@@ -12,11 +12,17 @@ public class PlayerController : MonoBehaviour {
     private Animator playerAnimator;
     public LayerMask ground;
 
+    public ParticleSystem stars;
+    private ParticleSystem.EmissionModule starsModule;
+    public float emissionRate;
+
 	// Use this for initialization
 	void Start () {
         player = GetComponent<Rigidbody2D>();
         playerCollider = GetComponent<Collider2D>();
         playerAnimator = GetComponent<Animator>();
+        starsModule = stars.emission;
+        
 	
 	}
 	
@@ -35,7 +41,9 @@ public class PlayerController : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButton(0)) {
             //Only allow jumping if the player is on the ground
             if (grounded) {
+                Instantiate(stars, player.transform.position, player.transform.rotation);
                 player.velocity = new Vector2(player.velocity.x, jumpForce);
+                
             }
             
         }
