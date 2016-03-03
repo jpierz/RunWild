@@ -4,39 +4,40 @@ using System.Collections.Generic;
 
 public class ObjectPooler : MonoBehaviour {
 
-    public GameObject pooledObject;
+    //For the platform and how many to initialize
+    public GameObject pooledPlatform;
     public int amountObjects;
 
-    private List<GameObject> objects;
+    //List for platforms
+    private List<GameObject> platforms;
 
     // Use this for initialization
     void Start() {
-        objects = new List<GameObject>();
+        platforms = new List<GameObject>();
 
         //Add non-active objects to a list
         for (int i = 0; i < amountObjects; i++) {
-            GameObject obj = (GameObject) Instantiate(pooledObject);
+            GameObject obj = (GameObject)Instantiate(pooledPlatform);
             obj.SetActive(false);
-            objects.Add(obj);
+            platforms.Add(obj);
+           
         }
 	}
 
-    public GameObject GetPooledObject() {
-
+    //Getting a pooled platform
+    public GameObject GetPooledPlatform() {
         //Searching for an inactive object
-        for (int i = 0; i < objects.Count; i++) {
-            if (!objects[i].activeInHierarchy) {
-                return objects[i];
+        for (int i = 0; i < platforms.Count; i++) {
+            if (!platforms[i].activeInHierarchy) {
+                //Found an inactive object, return it to be used
+                return platforms[i];
             }
         }
 
         //Adding a pooled object, no inactive ones were found
-        GameObject obj = (GameObject)Instantiate(pooledObject);
+        GameObject obj = (GameObject)Instantiate(pooledPlatform);
         obj.SetActive(false);
-        objects.Add(obj);
+        platforms.Add(obj);
         return obj;
-
     }
-	
-    
 }

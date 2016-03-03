@@ -12,6 +12,7 @@ public class PlatformDespawner : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        //If the platform's x position is behind the despawner... despawn!
 	    if (transform.position.x < despawnPoint.transform.position.x) {
             gameObject.SetActive(false);
         }
