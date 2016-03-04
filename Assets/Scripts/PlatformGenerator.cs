@@ -22,6 +22,13 @@ public class PlatformGenerator : MonoBehaviour {
     //Using this as the random selector
     private int platformSelector;
 
+    //New variables for the random height of platforms
+    public Transform maxHeightPoint;
+    public float heightVariation;
+    private float minHeight;
+    private float maxHeight;
+    private float heightChange;
+    
 	// Use this for initializationd
 	void Start () {
         //Setting up the array of platformWidths
@@ -30,6 +37,9 @@ public class PlatformGenerator : MonoBehaviour {
         for (int i = 0; i < objPooler.Length; i++) {
             platformWidths[i] = objPooler[i].pooledPlatform.GetComponent<BoxCollider2D>().size.x;
         }
+
+        minHeight = transform.position.y;
+        maxHeight = maxHeightPoint.transform.position.y;
         
 	}
 	
@@ -42,11 +52,20 @@ public class PlatformGenerator : MonoBehaviour {
             //Calculating random distance
             gapRandomDistance = Random.Range(minGapDistance, maxGapDistance);
 
+            //Creating a random height and adding it to the current platform's height, it could go lower or higher
+            heightChange = transform.position.y + Random.Range(heightVariation, -heightVariation);
+
+            //Checking to make sure the new random height is within the bounds set
+            if (heightChange > maxHeight) {
+                heightChange = maxHeight;
+            } else if (heightChange < minHeight) {
+                heightChange = minHeight;
+            }
             //Updating the location of the PlatformGenerator and creating the spawn point for the new platform.
             //Without the (platformWidths[platformSelector] / 2), the point was always in the middle of the platform
             //So sometimes platforms would be spawned from the middle of a platform, making a huge long connected one
             //With this bit, the point is always at the end of the platform so new spawns will go there + random distance
-            transform.position = new Vector3(transform.position.x + (platformWidths[platformSelector] / 2) + gapRandomDistance, transform.position.y, transform.position.x);
+            transform.position = new Vector3(transform.position.x + (platformWidths[platformSelector] / 2) + gapRandomDistance, heightChange, transform.position.x);
 
             //Getting a random platform and getting a free instance, updating its position, and making it active
             groundPlatform = objPooler[platformSelector].GetPooledPlatform();

@@ -74,6 +74,7 @@
     <Compile Include="Assets\Scripts\PlatformDespawner.cs" />
     <Compile Include="Assets\Scripts\PlatformGenerator.cs" />
     <Compile Include="Assets\Scripts\PlayerController.cs" />
+    <Compile Include="Assets\Scripts\ReskinAnimation.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
 </Project>
