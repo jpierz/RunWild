@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour {
 
@@ -32,22 +33,30 @@ public class PlayerController : MonoBehaviour {
     public string[] spriteSheetNames;
     private int skinCounter;
 
+    //References of SceneManager to reload scene and ScoreManager to control the score
+    private SceneManager SceneManager;
+    public ScoreManager scoreManager;
 
     // Use this for initialization
-    void Start () {
+    void Start() {
         //Init for objects/components
         player = GetComponent<Rigidbody2D>();
-       //playerCollider = GetComponent<Collider2D>();
+
+        //playerCollider = GetComponent<Collider2D>();
         playerAnimator = GetComponent<Animator>();
 
         //Updating the jumpTimeCounter to actually be changed and leave jumpTime static
         jumpTimeCounter = jumpTime;
+
         //Setting the first milestone
         speedMilestoneCounter = speedMilestone;
+
         //Initializing the skinCounter
         skinCounter = 0;
+
         //Initializing the milestonesAchieved counter
         milestonesAchieved = 0;
+
     }
 	
 	// Update is called once per frame
@@ -63,14 +72,14 @@ public class PlayerController : MonoBehaviour {
             speedMilestoneCounter += speedMilestone;
             speedMilestone *= speedUpValue;
             milestonesAchieved++;
+
             //If the counter won't go out of array's bounds, the player has achieved 2 milestones, and the number of milestones passed is odd
             //just to extend the life of each sprite, otherwise they cycle through too fast
             if (skinCounter < spriteSheetNames.Length && milestonesAchieved > 2 && milestonesAchieved % 3 == 0) {
                 //Update the spritesheet of the character by using the changeSkin handle to ReskinAnimation
                 changeSkin.spriteSheetName = spriteSheetNames[skinCounter];
                 skinCounter++;
-            } 
-            
+            }         
         }
         //Player speed
         player.velocity = new Vector2(moveSpeed, player.velocity.y);
@@ -107,4 +116,21 @@ public class PlayerController : MonoBehaviour {
         }
 	
 	}
+
+    //"Death" of the player
+    void OnCollisionEnter2D(Collision2D other) {
+
+        //If the collision is an object with the tag killbox, reset
+        if (other.gameObject.tag == "killbox") {
+
+            //Stop scoring
+            scoreManager.setScoringFalse();
+
+            //Save the current scores
+            scoreManager.saveScore();
+
+            //Reloading the level
+            SceneManager.LoadScene("Runner");
+        }
+    }
 }
