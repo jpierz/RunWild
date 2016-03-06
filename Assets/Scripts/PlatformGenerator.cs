@@ -5,6 +5,7 @@ public class PlatformGenerator : MonoBehaviour {
 
     //The ground to be spawned
     public GameObject groundPlatform;
+    public GameObject theCoin;
 
     //The point where the spawn location is
     public Transform spawnPoint;
@@ -19,6 +20,11 @@ public class PlatformGenerator : MonoBehaviour {
 
     //An array for each of the platform lengths of the objectPooler class
     public ObjectPooler[] objPooler;
+
+    //An array for the coins
+    public ObjectPooler[] objPoolerCoins;
+
+
     //Using this as the random selector
     private int platformSelector;
 
@@ -65,13 +71,26 @@ public class PlatformGenerator : MonoBehaviour {
             //Without the (platformWidths[platformSelector] / 2), the point was always in the middle of the platform
             //So sometimes platforms would be spawned from the middle of a platform, making a huge long connected one
             //With this bit, the point is always at the end of the platform so new spawns will go there + random distance
-            transform.position = new Vector3(transform.position.x + (platformWidths[platformSelector] / 2) + gapRandomDistance, heightChange, transform.position.x);
+            transform.position = new Vector3(transform.position.x + (platformWidths[platformSelector] / 2) + gapRandomDistance, heightChange, transform.position.z);
 
             //Getting a random platform and getting a free instance, updating its position, and making it active
             groundPlatform = objPooler[platformSelector].GetPooledPlatform();
             groundPlatform.transform.position = transform.position;
             groundPlatform.transform.rotation = transform.rotation;
             groundPlatform.SetActive(true);
+
+            //Making the coin spawning a bit more rare by adding RNG to it
+            if ((Random.Range(0, 5) == 3)) {
+                //Same thing with selecting a platform, using object pooling for the coins and making it active
+                theCoin = objPoolerCoins[platformSelector].GetPooledCoin();
+
+                //This position is actually the point a bit off the actual platform itself which works perfect as players can grab the coins as they jump and not waste
+                //jumps in the middle of the platform and throwing their next jump timer off causing them to die
+                theCoin.transform.position = new Vector3(transform.position.x, transform.position.y + 2, transform.position.z);
+                theCoin.transform.rotation = transform.rotation;
+                theCoin.SetActive(true);
+            }
+
 
             //Adds a little bit of distance for the next calculation to space the platforms out a bit from the edge of the previous platform
             transform.position = new Vector3(transform.position.x + (platformWidths[platformSelector] / 2), transform.position.y, transform.position.x);

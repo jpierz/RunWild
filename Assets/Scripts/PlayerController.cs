@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour {
     public float moveSpeed;
     public float jumpForce;
     private bool grounded;
+    private int doubleJump;
     public float jumpTime;
     private float jumpTimeCounter;
 
@@ -37,6 +38,8 @@ public class PlayerController : MonoBehaviour {
     private SceneManager SceneManager;
     public ScoreManager scoreManager;
 
+    public ParticleSystem stars;
+
     // Use this for initialization
     void Start() {
         //Init for objects/components
@@ -56,6 +59,10 @@ public class PlayerController : MonoBehaviour {
 
         //Initializing the milestonesAchieved counter
         milestonesAchieved = 0;
+
+        doubleJump = 0;
+
+        stars.GetComponent<ParticleSystem>().Stop();
 
     }
 	
@@ -79,6 +86,7 @@ public class PlayerController : MonoBehaviour {
                 //Update the spritesheet of the character by using the changeSkin handle to ReskinAnimation
                 changeSkin.spriteSheetName = spriteSheetNames[skinCounter];
                 skinCounter++;
+                enableTrails();
             }         
         }
         //Player speed
@@ -93,6 +101,10 @@ public class PlayerController : MonoBehaviour {
             //Only allow jumping if the player is on the ground
             if (grounded) {
                 player.velocity = new Vector2(player.velocity.x, jumpForce);
+                doubleJump++;
+            } else if (doubleJump < 1) {
+                player.velocity = new Vector2(player.velocity.x, (float)(jumpForce * 1.5));
+                doubleJump++;
             }
             
         }
@@ -113,6 +125,7 @@ public class PlayerController : MonoBehaviour {
         //Reset the jumpTimeCounter when grounded, allowing for a long jump
         if (grounded) {
             jumpTimeCounter = jumpTime;
+            doubleJump = 0;
         }
 	
 	}
@@ -132,5 +145,15 @@ public class PlayerController : MonoBehaviour {
             //Reloading the level
             SceneManager.LoadScene("Runner");
         }
+    }
+
+    public void enableTrails() {
+        stars.GetComponent<ParticleSystem>().Play();
+        StartCoroutine("disableTrails");
+    }
+
+    private IEnumerator disableTrails() {
+        yield return new WaitForSeconds(1);
+        stars.GetComponent<ParticleSystem>().Stop();
     }
 }
