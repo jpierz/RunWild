@@ -8,9 +8,9 @@ public class PlayerController : MonoBehaviour {
     public float moveSpeed;
     public float jumpForce;
     private bool grounded;
-    private int doubleJump;
     public float jumpTime;
     private float jumpTimeCounter;
+    private bool stoppedJumping;
 
     //For more details about the player
     private Rigidbody2D player;
@@ -60,9 +60,11 @@ public class PlayerController : MonoBehaviour {
         //Initializing the milestonesAchieved counter
         milestonesAchieved = 0;
 
-        doubleJump = 0;
-
+        //Stopping the emission of stars
         stars.GetComponent<ParticleSystem>().Stop();
+
+        //Initializing stoppedJumping
+        stoppedJumping = true;
 
     }
 	
@@ -87,6 +89,7 @@ public class PlayerController : MonoBehaviour {
                 changeSkin.spriteSheetName = spriteSheetNames[skinCounter];
                 skinCounter++;
                 enableTrails();
+                scoreManager.addScore(50);
             }         
         }
         //Player speed
@@ -97,20 +100,18 @@ public class PlayerController : MonoBehaviour {
         playerAnimator.SetBool("Grounded", grounded);
 
         //Jump on space/left mouse
-        if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButton(0)) {
+        if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0)) {
             //Only allow jumping if the player is on the ground
             if (grounded) {
+                stoppedJumping = false;
                 player.velocity = new Vector2(player.velocity.x, jumpForce);
-                doubleJump++;
-            } else if (doubleJump < 1) {
-                player.velocity = new Vector2(player.velocity.x, (float)(jumpForce * 1.5));
-                doubleJump++;
             }
-            
         }
 
         //Allowing the player to continue jumping for a little bit, adding a long jump effect
-        if (Input.GetKey(KeyCode.Space) || Input.GetMouseButton(0)) {
+        //Added in a check to only allow this to happen if the player just stopped jumping and is still mid air
+        //Otherwise this triggered when the player walked off a platform too
+        if ((Input.GetKey(KeyCode.Space) || Input.GetMouseButton(0)) && !stoppedJumping) {
             if (jumpTimeCounter > 0) {
                 player.velocity = new Vector2(player.velocity.x, jumpForce);
                 jumpTimeCounter -= Time.deltaTime;
@@ -118,14 +119,16 @@ public class PlayerController : MonoBehaviour {
         }
 
         //When the jump key is released, don't allow any more jumps (before you could jump mid-air)
+        //Resets stoppedJumping
         if (Input.GetKeyUp(KeyCode.Space) || Input.GetMouseButtonUp(0)) {
+            stoppedJumping = true;
             jumpTimeCounter = 0;
+            
         }
 
         //Reset the jumpTimeCounter when grounded, allowing for a long jump
         if (grounded) {
             jumpTimeCounter = jumpTime;
-            doubleJump = 0;
         }
 	
 	}
@@ -142,16 +145,24 @@ public class PlayerController : MonoBehaviour {
             //Save the current scores
             scoreManager.saveScore();
 
-            //Reloading the level
-            SceneManager.LoadScene("Runner");
+            //Restarting the level after a delay
+            StartCoroutine("restartLevel");
         }
     }
 
+    //Restarting the level
+    public IEnumerator restartLevel() {
+        yield return new WaitForSeconds(1);
+        SceneManager.LoadScene("Runner");
+    }
+
+    //Enables the stars around the player for a little bit
     public void enableTrails() {
         stars.GetComponent<ParticleSystem>().Play();
         StartCoroutine("disableTrails");
     }
 
+    //Disables the trails after a second
     private IEnumerator disableTrails() {
         yield return new WaitForSeconds(1);
         stars.GetComponent<ParticleSystem>().Stop();
