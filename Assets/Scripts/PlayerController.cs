@@ -38,10 +38,28 @@ public class PlayerController : MonoBehaviour {
     private SceneManager SceneManager;
     public ScoreManager scoreManager;
 
+    //Handle for the particle system
     public ParticleSystem stars;
+
+    //Handling the death screen
+    public GameObject death;
+
+    //Handle for the scrolling background
+    private ScrollScript scrollingBackground;
+
+    private AudioSource sound;
 
     // Use this for initialization
     void Start() {
+        //Finding the scroll script
+        scrollingBackground = FindObjectOfType<ScrollScript>();
+
+        //Handler for sound
+        sound = FindObjectOfType<AudioSource>();
+
+        //Setting the death screen to be inactive
+        death.SetActive(false);
+
         //Init for objects/components
         player = GetComponent<Rigidbody2D>();
 
@@ -138,6 +156,12 @@ public class PlayerController : MonoBehaviour {
 
         //If the collision is an object with the tag killbox, reset
         if (other.gameObject.tag == "killbox") {
+            //Stopping the background scrolling and the camera from moving
+            scrollingBackground.scrollSpeed = 0;
+            moveSpeed = 0;
+            
+            //Disabling sound
+            sound.enabled = false;
 
             //Stop scoring
             scoreManager.setScoringFalse();
@@ -145,15 +169,10 @@ public class PlayerController : MonoBehaviour {
             //Save the current scores
             scoreManager.saveScore();
 
-            //Restarting the level after a delay
-            StartCoroutine("restartLevel");
+            //Restarting the level
+            death.SetActive(true);
+            
         }
-    }
-
-    //Restarting the level
-    public IEnumerator restartLevel() {
-        yield return new WaitForSeconds(1);
-        SceneManager.LoadScene("Runner");
     }
 
     //Enables the stars around the player for a little bit
